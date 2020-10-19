@@ -1,22 +1,53 @@
-import React from 'react'
-import "./SidebarChat.css"
+import React, { useState, useEffect } from "react";
+import "./SidebarChat.css";
+import { useDispatch } from "react-redux";
+import { setChat } from "./features/chatSlice";
 
-import { Avatar } from "@material-ui/core"
+import { Avatar } from "@material-ui/core";
+import db from "./firebase";
+import * as timeago from "timeago.js";
 
-function SidebarChat() {
-    return (
-        <div className="sidebarChat">
-            <Avatar />
-            <div className="sidebarChat__info">
-                {/* CHANEL NAME */}
-                <h3>Chanel Name</h3>
-                {/* MESSAGE WAITTING */}
-                <p>message.......</p>
-                {/* TIME */}
-                <small>time</small>
-            </div>
-        </div>
-    )
+function SidebarChat({ id, chatName }) {
+  const dispatch = useDispatch();
+  const [chatInfo, setChatInfo] = useState([]);
+
+  useEffect(() => {
+    db.collection("chats")
+      .doc(id)
+      .collection("messages")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) =>
+        setChatInfo(snapshot.docs.map((doc) => doc.data()))
+      );
+  }, [id]);
+
+  return (
+    <div
+      onClick={() => {
+        dispatch(
+          setChat({
+            chatId: id,
+            chatName: chatName,
+          })
+        );
+      }}
+      className="sidebarChat"
+    >
+      <Avatar src={chatInfo[0]?.photo} />
+      <div className="sidebarChat__info">
+        {/* CHANEL NAME */}
+        <h3>{chatName}</h3>
+        {/* MESSAGE WAITTING */}
+        <p>{chatInfo[0]?.message}</p>
+        {/* TIME */}
+        <small>
+          {timeago.format(
+            new Date(chatInfo[0]?.timestamp?.toDate()).toLocaleString()
+          )}
+        </small>
+      </div>
+    </div>
+  );
 }
 
-export default SidebarChat
+export default SidebarChat;

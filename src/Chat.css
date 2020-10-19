@@ -32,11 +32,13 @@
 }
 
 .chat__input > form {
+  display: flex;
   flex: 1;
 }
 
 .chat__messages {
   flex: 1;
+  overflow: scroll;
 }
 
 .chat__input > form > input {
@@ -49,4 +51,5 @@
 
 .chat_input > form > button {
   display: none;
+  padding: 20px;
 }
